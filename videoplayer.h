@@ -60,7 +60,6 @@ private:
     QPushButton         *m_pStopButton;
     CustomSlider        *m_pPositionSlider;
     CustomSlider        *m_pVolumeSlider;
-    QLabel              *m_pErrorLabel;
     QLabel              *m_pElapsedTimeLabel;
     QLabel              *m_pDurationLabel;
     QBoxLayout          *m_pMainLayout;

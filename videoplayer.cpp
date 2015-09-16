@@ -8,21 +8,18 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QStyle>
+#include <QMessageBox>
 
 VideoPlayer::VideoPlayer(QWidget *parent) :
     QWidget(parent),
     m_MediaPlayer(0, QMediaPlayer::VideoSurface),
     m_pPlayButton(0),
-    m_pPositionSlider(0),
-    m_pErrorLabel(0)
+    m_pPositionSlider(0)
 {
     QAbstractButton *pOpenButton = new QPushButton(tr("Load file"));
     connect(pOpenButton, SIGNAL(clicked()), this, SLOT(openFile()));
 
     this->initControls();
-
-    this->m_pErrorLabel = new QLabel();
-    this->m_pErrorLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
 
     QBoxLayout *pControlsLayout = new QHBoxLayout();
     pControlsLayout->setMargin(0);
@@ -47,7 +44,6 @@ VideoPlayer::VideoPlayer(QWidget *parent) :
     this->m_pMainLayout = new QVBoxLayout();
     this->m_pMainLayout->addWidget(this->m_pVideoWidget);
     this->m_pMainLayout->addLayout(pControlsLayout);
-    this->m_pMainLayout->addWidget(this->m_pErrorLabel);
     this->m_pMainLayout->setMargin(0);
 
     this->m_pMainLayout->setSizeConstraint(QLayout::SetMinimumSize);
@@ -94,19 +90,27 @@ void VideoPlayer::playSelectedFile(QString file)
 {
     QFileInfo fileInfo(file);
 
-    if(file.isEmpty() == false)
+    QString fileExtension = fileInfo.suffix();
+    if((fileExtension == "avi") || (fileExtension == "mp4") ||
+       (fileExtension == "flv") || (fileExtension == "mov"))
     {
-        this->m_MediaPlayer.setMedia(QUrl::fromLocalFile(file));
-        this->setWindowTitle("SVP - " + fileInfo.fileName());
+        if(file.isEmpty() == false)
+        {
+            this->m_MediaPlayer.setMedia(QUrl::fromLocalFile(file));
+            this->setWindowTitle("SVP - " + fileInfo.fileName());
+        }
+    }
+    else
+    {
+        QMessageBox::information(0, "Invalid file", "Cannot play this file! It must be *.avi, *.mp4, "
+                                                    "*.flv or *.mov");
     }
 }
 
 void VideoPlayer::openFile()
 {
-    this->m_pErrorLabel->setText("");
-
     QFileDialog openFileDialog;
-    openFileDialog.setNameFilter("Video files (*.avi *.mp4 *.flv)");
+    openFileDialog.setNameFilter("Video files (*.avi *.mp4 *.flv *.mov)");
 
     if(openFileDialog.exec() == true)
     {
@@ -187,7 +191,7 @@ void VideoPlayer::setPosition(int position)
 void VideoPlayer::handleError()
 {
     this->m_pPlayButton->setEnabled(false);
-    this->m_pErrorLabel->setText("Error: " + this->m_MediaPlayer.errorString());
+    QMessageBox::information(0, "Error", this->m_MediaPlayer.errorString());
 }
 
 void VideoPlayer::setFullscreen()
@@ -250,6 +254,7 @@ void VideoPlayer::initControls()
             &this->m_MediaPlayer, SLOT(stop()));
 
     this->m_pElapsedTimeLabel = new QLabel();
+    this->m_pElapsedTimeLabel->setText("00:00:00");
     this->m_pElapsedTimeLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
 
     this->m_pPositionSlider = new CustomSlider(Qt::Horizontal);
@@ -259,6 +264,7 @@ void VideoPlayer::initControls()
             this, SLOT(setPosition(int)));
 
     this->m_pDurationLabel = new QLabel();
+    this->m_pDurationLabel->setText("00:00:00");
     this->m_pDurationLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
 
     this->m_pVolumeButton = new QPushButton();
@@ -279,14 +285,21 @@ void VideoPlayer::initControls()
 void VideoPlayer::setFullscreenControls()
 {
     this->m_pFullscreenControls = this->m_pVideoWidget->getFullscreenControls();
+
     connect(this->m_pFullscreenControls->getPositionSlider(), SIGNAL(sliderMoved(int)),
             this, SLOT(setPosition(int)));
+
     connect(this->m_pFullscreenControls->getVolumeSlider(), SIGNAL(sliderMoved(int)),
             &this->m_MediaPlayer, SLOT(setVolume(int)));
+
     connect(this->m_pFullscreenControls->getStopButton(), SIGNAL(clicked(bool)),
             &this->m_MediaPlayer, SLOT(stop()));
+
     connect(this->m_pFullscreenControls->getPlayButton(), SIGNAL(clicked(bool)),
             this, SLOT(play()));
+
+    connect(this->m_pFullscreenControls->getVolumeButton(), SIGNAL(clicked(bool)),
+            this, SLOT(setMuted()));
 }
 
 void VideoPlayer::initMediaPlayer()
@@ -329,14 +342,14 @@ void VideoPlayer::setMuted()
         this->m_MediaPlayer.setMuted(true);
         this->m_pVolumeButton->setIcon(style()->standardIcon(QStyle::SP_MediaVolumeMuted));
         this->m_pVolumeButton->setToolTip(tr("Unmute"));
-        this->m_pFullscreenControls->setVolumeButton(this->m_pVolumeButton);
+        this->m_pFullscreenControls->setVolumeButton(true);
     }
     else
     {
         this->m_MediaPlayer.setMuted(false);
         this->m_pVolumeButton->setIcon(style()->standardIcon(QStyle::SP_MediaVolume));
         this->m_pVolumeButton->setToolTip(tr("Mute"));
-        this->m_pFullscreenControls->setVolumeButton(this->m_pVolumeButton);
+        this->m_pFullscreenControls->setVolumeButton(false);
     }
 }
 
