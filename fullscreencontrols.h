@@ -29,7 +29,7 @@ public:
 
     void setPlayButton();
     void setPauseButton();
-    void setVolumeButton(QPushButton *pVolumeButton);
+    void setVolumeButton(bool muted);
     void setVolumeSlider(int volume);
 
     void setElapsedTimeLabel(QLabel *pElapsedTimeLabel);

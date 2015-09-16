@@ -31,9 +31,11 @@ FullscreenControls::FullscreenControls(QWidget *parent) : QWidget(parent)
 
     this->m_pVolumeButton = new QPushButton();
     this->m_pVolumeButton->setIcon(style()->standardIcon(QStyle::SP_MediaVolume));
+    this->m_pVolumeButton->setToolTip("Mute");
 
     this->m_pVolumeSlider = new CustomSlider(Qt::Horizontal);
     this->m_pVolumeSlider->setRange(0, 100);
+    this->m_pVolumeSlider->setValue(100);
     this->m_pVolumeSlider->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
     this->m_pControlsLayout = new QHBoxLayout();
@@ -114,9 +116,18 @@ void FullscreenControls::setPauseButton()
     this->m_pPlayButton->setToolTip("Pause");
 }
 
-void FullscreenControls::setVolumeButton(QPushButton *pVolumeButton)
+void FullscreenControls::setVolumeButton(bool muted)
 {
-    this->m_pVolumeButton = pVolumeButton;
+    if(muted == false)
+    {
+        this->m_pVolumeButton->setIcon(style()->standardIcon(QStyle::SP_MediaVolume));
+        this->m_pVolumeButton->setToolTip("Mute");
+    }
+    else
+    {
+        this->m_pVolumeButton->setIcon(style()->standardIcon(QStyle::SP_MediaVolumeMuted));
+        this->m_pVolumeButton->setToolTip("Unmute");
+    }
 }
 
 void FullscreenControls::setVolumeSlider(int volume)
