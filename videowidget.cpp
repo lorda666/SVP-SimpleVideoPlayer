@@ -70,7 +70,7 @@ void VideoWidget::paintEvent(QPaintEvent *pEvent)
     QPainter painter(this);
     painter.fillRect(this->rect(), backgroundColor);
 
-    //QVideoWidget::paintEvent(pEvent);
+    QVideoWidget::paintEvent(pEvent);
 }
 
 void VideoWidget::initFullscreenControls()
