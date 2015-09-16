@@ -1,5 +1,8 @@
 # SVP-SimpleVideoPlayer
 
-Video player that opens a single video file.
+Video player which plays a single video file.
+Valid file formats: *.avi, *.mp4, *.flv and *.mov.
 
 Written in Qt 5.5.
+
+Emil Petrov
